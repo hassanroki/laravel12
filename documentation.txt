@@ -1,0 +1,35 @@
+Start Laravel 12: 16-05-2025:
+============================
+1. Environment Setup – Install & Configure Laravel:
+---------------------------------------------------
+i) Install Xampp
+ii) Install Composer
+iii) Install MySQL Workbench
+iv) Install Node js
+v) VS Code:
+VS Code Extentention:
+a) Laravel
+b)) PHP Intelephense
+
+
+
+
+2. How to Install Laravel 12:
+-----------------------------
+Command: composer create-project laravel/laravel studentManagement
+Then, Command: cd studentManagement
+Then, Command: code .
+
+Run Command: php artisan serve
+
+
+
+
+
+
+
+
+
+
+
+
