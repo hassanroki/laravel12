@@ -1,7 +1,7 @@
 Start Laravel 12: 16-05-2025:
 ============================
-1. Environment Setup – Install & Configure Laravel:
----------------------------------------------------
+02. Environment Setup – Install & Configure Laravel:
+----------------------------------------------------
 i) Install Xampp
 ii) Install Composer
 iii) Install MySQL Workbench
@@ -14,13 +14,404 @@ b)) PHP Intelephense
 
 
 
-2. How to Install Laravel 12:
------------------------------
+03. How to Install Laravel 12:
+------------------------------
 Command: composer create-project laravel/laravel studentManagement
 Then, Command: cd studentManagement
 Then, Command: code .
 
 Run Command: php artisan serve
+
+
+
+04. Laravel 12 MVC Explained:
+-----------------------------
+M: Model
+V: View
+C: Controller
+
+
+
+
+
+05. Laravel 12 Routing Explained:
+---------------------------------
+Route::get('/', function(){
+    return 'Hello from laravel';
+});
+
+Route::get('/about', function(){
+    return "About Us";
+});
+
+
+
+
+06. Laravel 12 Route Grouping & Naming:
+---------------------------------------
+// Group Route Used Prefix and Group
+// Name Route
+// Route::get('/details/student', function(){
+//     return "I am Student";
+// });
+
+// Route::get('/details/teacher', function(){
+//     return "I am Teacher";
+// });
+
+Route::prefix('/details')->group(function(){
+Route::get('/student', function(){
+    return "I am Student";
+})->name('student-details');
+
+Route::get('/teacher', function(){
+    return "I am Teacher";
+})->name('teachers-details');
+});
+
+
+
+
+
+
+07. Laravel 12 Route Parameters & Fallback:
+-------------------------------------------
+a) Parameter Pass & Not Page Found:
+Route::get('/student/{id}/{reg}', function($id, $reg){
+    return "Student Number:" . " " . $id . "<br>" . "Registration Number: " . $reg;
+});
+
+Route::fallback(function(){
+    return "This page is no found please try again";
+});
+
+
+
+
+
+
+
+
+
+08. Laravel 12 View Explainded - Indroduction to Blade Templates:
+-----------------------------------------------------------------
+a) Aboutus & Contactus View Create
+Command: php artisan make:view aboutus
+Command: php artisan make:view contactus
+
+Edit resources>views>aboutus.blade.php:
+<div>
+    <h2>About Us</h2>
+</div>
+
+
+Edit resources>views>contactus.blade.php:
+<div>
+    <h2>Contact Us</h2>
+</div>
+
+
+2) Create Route:
+Edit Routes>web.php:
+Route::get('/about-us', function(){
+    return view('aboutus');
+});
+
+Route::get('/contact-us', function(){
+    return view('contactus');
+});
+
+
+
+
+
+
+
+09. Laravel 12 Passing Data from Route to View Explainded:
+----------------------------------------------------------
+09. a) Aboutus & Contactus View Create
+Command: php artisan make:view aboutus
+Command: php artisan make:view contactus
+
+Edit resources>views>aboutus.blade.php:
+<div>
+    <h2>About Us</h2>
+    <h2>Name: {{ $name }} </h2>
+    <h2>Email: {{ $email }}</h2>
+</div>
+
+
+Edit resources>views>contactus.blade.php:
+<div>
+    <h2>Contact Us</h2>
+    <h2>Name: {{ $name }} </h2>
+    <h2>Email: {{ $email }}</h2>
+</div>
+
+
+09. b) Create Route:
+Edit Routes>web.php:
+
+Route::get('/about-us', function(){
+    $name = "Tester";
+    $email = "tester@gmail.com";
+    // way-1
+    // return view('aboutus')->with('name', $name)->with('email', $email);
+
+    // way-2
+    // return view('aboutus', compact('name', 'email'));
+
+    // way-3
+    // return view('aboutus', ['name' => $name, 'email' => $email]);
+});
+
+Route::view('/contact-us', 'contactus', ['name' => "Hassan", 'email' => "hassan@gmail.com"]);
+
+
+
+09. c) Parameters Pass
+
+Edit resources>views>aboutus.blade.php:
+<div>
+    <h2>About Us</h2>
+    <h2>Name: {{ $name }} </h2>
+    <h2>ID: {{ $id }}</h2>
+</div>
+
+
+
+Edit resources>views>contactus.blade.php:
+<div>
+    <h2>Contact Us</h2>
+    <h2>Name: {{ request()->name }} </h2>
+    <h2>ID: {{ request()->id }}</h2>
+</div>
+
+
+09. d) Edit Routes>web.php:
+Route::get('/about-us/{name}/{id}', function($name, $id){
+    return view('aboutus', compact('name', 'id'));
+
+});
+
+Route::view('/contact-us/{name}/{id}', 'contactus');
+"hassan@gmail.com"]);
+
+
+
+
+
+
+10. Laravel 12 Blade Directives - Master Templating Like a Pro:
+---------------------------------------------------------------
+10. a) Directives follow laravel Documentation.
+Such as Directives:
+@for ($i = 0; $i < 10; $i++)
+        <p>{{ $i }}</p>
+        @if ($i == 5)
+            <h1>Hi this is {{ $i }}</h1>
+        @endif
+    @endfor
+
+
+
+
+
+
+
+
+
+11. Laravel 12 Subviews & View Caching - Optimize Your Blade Templates:
+-----------------------------------------------------------------------
+11. a) Create Folder subview, then create file input.blade.php
+Edit Resources>views>subview>input.blade.php:
+<div class="form">
+        <label for="name">Name</label>
+        <input type="text" name="name" id="name" value="{{ $myName }}">
+    </div>
+
+
+11. B) Edit Resources>views>aboutus.blade.php:
+<div>
+    <h2>About Us</h2>
+    <h2>Name: {{ $name }} </h2>
+    <h2>ID: {{ $id }}</h2>
+
+   @include('subview.input', [
+    'myName' => $name,
+   ])
+</div>
+
+
+11. C) Cache Clear:
+Command: php artisan view:cache
+Command: php artisan view:clear
+
+
+
+
+
+
+
+
+
+
+12. Laravel 12 Creating Layouts with Blade for Reusable Templates:
+------------------------------------------------------------------
+12. A. i) Create Layouts Folder, Then Create app.blade.php file
+Edit Resources>views>layouts>app.blade.php:
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Demo</title>
+    <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.min.css') }}">
+    @yield('styles')
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg bg-light navbar-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Logo</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="#">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Features</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Pricing</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    @yield('content')
+    <footer class="bg-dark text-white text-center py-3 fixed-bottom">
+        <div class="container">
+            <p class="mb-0">&copy; 2025 My Website. All rights reserved.</p>
+        </div>
+    </footer>
+    <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('assets/js/jquery-3.7.0.min.js') }}"></script>
+    @yield('scripts')
+</body>
+
+</html>
+ 
+
+
+
+
+
+
+
+12. A. ii) Create aboutus.blade.php
+Edit Resources>views>aboutus.blade.php:
+@extends('layouts.app')
+@section('styles')
+<style>
+    h2{
+    text-align: center;
+    font-size: 36px;
+}
+</style>
+@endsection
+
+@section('content')
+<div class="container">
+    <h2>About Us</h2>
+    <p>lorem50</p>
+</div>
+@endsection
+
+@section('scripts')
+<script>
+    alert('Hello');
+</script>
+@endsection
+
+
+
+
+
+
+
+
+12. A. iii) Edit Route>web.php:
+Route::get('/about', function(){
+    return view('aboutus');
+});
+
+
+
+
+
+
+
+
+13. Laravel 12 Creating First Controller Step by Step:
+------------------------------------------------------
+13. A. i) Create Student Controller
+Command: php artisan make:controller StudentController
+Edit app>http>controller>StudentController.php:
+// Index
+    public function index(){
+        return "Hello Student! I am Hassan";
+    }
+
+    // About
+    public function about(){
+        return "Hi About!";
+    }
+
+
+
+
+13. A. ii) Create Route
+Edit Route>web.php:
+// Student Contrller
+// Route::get('/about-us', [StudentController::class, 'about']);
+// Route::get('/index', [StudentController::class, 'index']);
+Route::controller(StudentController::class)->group(function(){
+    Route::get('/about-us', 'about');
+Route::get('/index', 'index');
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
