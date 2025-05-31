@@ -13,12 +13,14 @@
 @section('content')
     <div class="container">
         <h2>About Us</h2>
-        <p>lorem50</p>
+        <p>Lorem ipsum dolor sit amet.</p>
+        <p>My Name: {{ $name }}</p>
+        <p>ID: {{ $id }}</p>
     </div>
 @endsection
 
 @section('scripts')
     <script>
-        alert('Hello');
+
     </script>
 @endsection

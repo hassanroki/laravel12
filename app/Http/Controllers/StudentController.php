@@ -12,7 +12,7 @@ class StudentController extends Controller
     }
 
     // About
-    public function about(){
-        return "Hi About!";
+    public function about($name, $id){
+        return view('aboutus', compact('name', 'id'));
     }
 }

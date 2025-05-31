@@ -360,8 +360,8 @@ Route::get('/about', function(){
 
 
 
-13. Laravel 12 Creating First Controller Step by Step:
-------------------------------------------------------
+13 => Laravel 12 Creating First Controller Step by Step:
+--------------------------------------------------------
 13. A. i) Create Student Controller
 Command: php artisan make:controller StudentController
 Edit app>http>controller>StudentController.php:
@@ -396,6 +396,36 @@ Route::get('/index', 'index');
 
 
 
+14 => Laravel 12 Passing Route Data to Controllers Explained:
+-------------------------------------------------------------
+14. A. i) Create Route>web.php
+Route::get('/about-us/{name}/{id}', [StudentController::class, 'about']);
+
+
+
+14. A. ii) Edit app>http>controller>StudentController.php:
+// About
+    public function about($name, $id){
+        return "My Name is: " . $name . "<br>" . "ID: " . $id;
+    }
+
+
+
+
+14. B. i) Create Route>web.php:
+Route::get('/about-us/{name}/{id}', [StudentController::class, 'about']);
+
+
+14. B. ii) Edit app>http>controller>StudentController.php:
+// About
+    public function about($name, $id){
+        return view('aboutus', compact('name', 'id'));
+    }
+
+
+14. B. iii) Edit Resources>views>about.blade.php:
+<p>My Name: {{ $name }}</p>
+        <p>ID: {{ $id }}</p>
 
 
 
@@ -405,7 +435,842 @@ Route::get('/index', 'index');
 
 
 
+16. => Laravel 12 Understanding Invoke & Resources Controllers:
+---------------------------------------------------------------
+16. A. i) Create Invoke Controller
+Command: php artisan make:controller TestController --invokable
+Edit app>http>controller>TestController.php:
+public function __invoke(Request $request)
+    {
+        // Invokable
+        return "Hi! Hassan";
+    }
 
+
+
+16. A. ii) Create Route>web.php:
+// Invoke
+Route::get('/invoke', TestController::class);
+
+
+
+
+16. B. i) Create Resources Controller
+Command: php artisan make:controller SecondTestController --resource
+Edit app>http>controller>SecondTestController.php:
+/**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        //Index
+        return "Resources Controller Index";
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+    }
+
+
+
+
+16. B. ii) Create Route>web.php:
+// Resources
+Route::resource('/second-test', SecondTestController::class);
+
+
+
+
+
+
+17 => Laravel 12 Introduction to Migrations - Manage Your Database Efficiently:
+-------------------------------------------------------------------------------
+17. A) Create MySQL Database & Connect Database
+Edit .env:
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=student
+DB_USERNAME=root
+DB_PASSWORD=
+
+Then, Command: php artisan migrate
+
+
+
+
+
+18, 19, 20, 21 => Laravel 12 - How to Create Migrations for Your Database:
+--------------------------------------------------------------------------
+18. A. i) Create Table Just Up() and down()
+Command: php artisan make:migration StudentTable
+Edit Database>migrations>2025_05_26_122543_student_table.php:
+public function up(): void
+    {
+        //
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        //
+    }
+
+
+
+18. A. ii) Create Schema With Table
+Command: php artisan make:migration create_students_table
+Edit Database>migrations>2025_05_26_122721_create_students_table.php:
+ public function up(): void
+    {
+        Schema::create('students', function (Blueprint $table) {
+            $table->id();
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('students');
+    }
+
+
+
+
+
+18, 19. B. i) Column Add
+Edit Database>migrations>2025_05_26_122721_create_students_table.php:
+Schema::create('students', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('email');
+            $table->integer('age');
+            $table->timestamps();
+        });
+
+Then, Command: php artisan migrates
+
+
+
+
+
+18, 19, 20. C. i) Add New Column
+Command: php artisan make:migration addDateOfBirthStudents --table=students
+Edit Database>migrations>2025_05_26_123747_add_date_of_birth_students.php:
+public function up(): void
+    {
+        Schema::table('students', function (Blueprint $table) {
+            $table->date('date_of_birth')->nullable();
+            $table->enum('gender', ['m', 'f'])->default('m');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('students', function (Blueprint $table) {
+            $table->dropColumn('date_of_birth');
+            $table->dropColumn('gender');
+        });
+    }
+
+Then, Command: php artisan migrate
+
+
+
+
+
+18, 19, 20, 21. D. i) Rollback Migrations and Undo Changes:
+Command: php artisan migrate:rollback
+
+Some Change
+Edit Database>migrations>2025_05_26_123747_add_date_of_birth_students.php:
+public function up(): void
+    {
+        Schema::table('students', function (Blueprint $table) {
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade')->onUpdate('cascade');
+            $table->date('date_of_birth')->nullable();
+            $table->enum('gender', ['m', 'f'])->default('m');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('students', function (Blueprint $table) {
+            $table->dropForeign('user_id');
+            $table->dropColumn('user_id');
+            $table->dropColumn('date_of_birth');
+            $table->dropColumn('gender');
+        });
+    }
+Then, Command: php artisan migrate
+
+
+
+
+
+18, 19, 20, 21. D. ii) How Many step before delete:
+Command: php artisan migrate:rollback --step=2
+Need Edit & Then, Command: php artisan migrate
+
+
+
+
+18, 19, 20, 21. D. iii) All Table Delete, it used only developer mode:
+Command: php artisan migrate:reset
+
+Need Edit & Then, Command: php artisan migrate
+
+
+
+18, 19, 20, 21. D. iv) All Data Delete, it used only developer mode:
+Command: php artisan migrate:fresh
+
+Need Edit & Then, Command: php artisan migrate
+
+
+
+
+
+
+
+22 => Introduction to Models:
+-----------------------------
+22. A) Create Model
+Command: php artisan make:model Teacher
+
+Create Model, Controller, & Migration Command: php artisan make:model Teacher -mc
+Edit Database>migration>2025_05_29_114656_create_teachers_table.php:
+ Schema::create('teachers', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('address');
+            $table->timestamps();
+        });
+
+Then, Command: php artisan migrate
+
+
+Edit app>models>Teacher.php
+protected $guarded = [];
+
+
+Edit app>htpp>controller>DepartmentTeacher.php:
+// index
+    public function index(){
+        return Teacher::all();
+    }
+
+
+Create Route>web.php:
+// Teachers
+Route::get('/teachers', [TeacherController::class, 'index']);
+
+
+
+
+
+
+
+23 => Laravel 12 Basic CRUD Operations using Models:
+----------------------------------------------------
+22. 23. A. i) Add Data
+Edit app>http>controller>TeacherController.php:
+// index
+    public function index()
+    {
+        return Teacher::all();
+    }
+
+    // Add
+    public function add()
+    {
+        $item          = new Teacher();
+        $item->name    = "Ritul";
+        $item->address = "Rajshahi";
+        $item->save();
+        return "Added Successfully!";
+    }
+
+    // Edit
+    public function edit($id)
+    {
+        $item          = Teacher::findOrFail($id);
+        $item->name    = "Ritul Mia";
+        $item->address = "Lalmonirhat";
+        $item->update();
+        return "Edit Successfully!";
+    }
+
+    // Show
+    public function show($id)
+    {
+        $item = Teacher::findOrFail($id);
+        return $item;
+    }
+
+    // Delete
+    public function delete($id)
+    {
+        $item = Teacher::findOrFail($id);
+        $item->delete();
+        return "Delete Successfully!";
+    }
+
+
+
+22. 23. A. ii) Create Route
+Edit Routes>web.php:
+// Teachers
+Route::get('/teachers', [TeacherController::class, 'index']);
+Route::get('/teachers-add', [TeacherController::class, 'add']);
+Route::get('/teachers-edit/{id}', [TeacherController::class, 'edit']);
+Route::get('/teachers-delete/{id}', [TeacherController::class, 'delete']);
+
+
+
+
+
+24 => Laravel 12 Introduction to Factories for Database Seeding:
+----------------------------------------------------------------
+24. A. i) Create Fake Data
+Command: php artisan make:factory TeacherFactory --model=Teacher
+Edit Database>factories>StudentFactory.php:
+return [
+            //
+            'name'    => $this->faker->name(),
+            'address' => $this->faker->address(),
+        ];
+
+
+
+24. A. ii) Edit app>Models>Teacher.php:
+// Factory
+    use HasFactory;
+
+
+
+
+24. A. iii) Edit Database>seeders>DatabaseSeeder.php:
+Teacher::factory(100)->create();
+
+
+Then, Command: php artisan db:seed
+
+
+
+
+
+
+25 => Laravel 12 - How to Use Seeders for Database Seeding:
+-----------------------------------------------------------
+25. A. i) Create Database, Model & Controller
+Command: php artisan make:model Country -mc
+
+Edit Database>migrations>2025_05_29_141250_create_countries_table.php:
+Schema::create('countries', function (Blueprint $table) {
+            $table->id();
+            $table->string('name')->nullable(false);
+            $table->string('code')->nullable(false);
+            $table->timestamps();
+        });
+
+
+Then, Command: php artisan migrate
+
+
+
+
+Edit app>models>Country.php
+//
+    protected $guarded = [];
+
+
+Edit app>http>controller>CountryController.php:
+
+
+
+
+25. B. i) Create Seeder
+
+Command: php artisan make:seeder CountrySeeder
+
+Edit Databas>seeders>CountrySeeder.php:
+// Country
+        $countries = [
+            ['name' => 'Afghanistan', 'code' => 'AF'],
+            ['name' => 'Åland Islands', 'code' => 'AX'],
+            ['name' => 'Albania', 'code' => 'AL'],
+            ['name' => 'Algeria', 'code' => 'DZ'],
+            ['name' => 'American Samoa', 'code' => 'AS'],
+            ['name' => 'AndorrA', 'code' => 'AD'],
+            ['name' => 'Angola', 'code' => 'AO'],
+            ['name' => 'Anguilla', 'code' => 'AI'],
+            ['name' => 'Antarctica', 'code' => 'AQ'],
+            ['name' => 'Antigua and Barbuda', 'code' => 'AG'],
+            ['name' => 'Argentina', 'code' => 'AR'],
+            ['name' => 'Armenia', 'code' => 'AM'],
+            ['name' => 'Aruba', 'code' => 'AW'],
+            ['name' => 'Australia', 'code' => 'AU'],
+            ['name' => 'Austria', 'code' => 'AT'],
+            ['name' => 'Azerbaijan', 'code' => 'AZ'],
+            ['name' => 'Bahamas', 'code' => 'BS'],
+            ['name' => 'Bahrain', 'code' => 'BH'],
+            ['name' => 'Bangladesh', 'code' => 'BD'],
+            ['name' => 'Barbados', 'code' => 'BB'],
+            ['name' => 'Belarus', 'code' => 'BY'],
+            ['name' => 'Belgium', 'code' => 'BE'],
+            ['name' => 'Belize', 'code' => 'BZ'],
+            ['name' => 'Benin', 'code' => 'BJ'],
+            ['name' => 'Bermuda', 'code' => 'BM'],
+            ['name' => 'Bhutan', 'code' => 'BT'],
+            ['name' => 'Bolivia', 'code' => 'BO'],
+            ['name' => 'Bosnia and Herzegovina', 'code' => 'BA'],
+            ['name' => 'Botswana', 'code' => 'BW'],
+            ['name' => 'Bouvet Island', 'code' => 'BV'],
+            ['name' => 'Brazil', 'code' => 'BR'],
+            ['name' => 'British Indian Ocean Territory', 'code' => 'IO'],
+            ['name' => 'Brunei Darussalam', 'code' => 'BN'],
+            ['name' => 'Bulgaria', 'code' => 'BG'],
+            ['name' => 'Burkina Faso', 'code' => 'BF'],
+            ['name' => 'Burundi', 'code' => 'BI'],
+            ['name' => 'Cambodia', 'code' => 'KH'],
+            ['name' => 'Cameroon', 'code' => 'CM'],
+            ['name' => 'Canada', 'code' => 'CA'],
+            ['name' => 'Cape Verde', 'code' => 'CV'],
+            ['name' => 'Cayman Islands', 'code' => 'KY'],
+            ['name' => 'Central African Republic', 'code' => 'CF'],
+            ['name' => 'Chad', 'code' => 'TD'],
+            ['name' => 'Chile', 'code' => 'CL'],
+            ['name' => 'China', 'code' => 'CN'],
+            ['name' => 'Christmas Island', 'code' => 'CX'],
+            ['name' => 'Cocos (Keeling) Islands', 'code' => 'CC'],
+            ['name' => 'Colombia', 'code' => 'CO'],
+            ['name' => 'Comoros', 'code' => 'KM'],
+            ['name' => 'Congo', 'code' => 'CG'],
+            ['name' => 'Congo, The Democratic Republic of the', 'code' => 'CD'],
+            ['name' => 'Cook Islands', 'code' => 'CK'],
+            ['name' => 'Costa Rica', 'code' => 'CR'],
+            ['name' => 'Cote D\'Ivoire', 'code' => 'CI'],
+            ['name' => 'Croatia', 'code' => 'HR'],
+            ['name' => 'Cuba', 'code' => 'CU'],
+            ['name' => 'Cyprus', 'code' => 'CY'],
+            ['name' => 'Czech Republic', 'code' => 'CZ'],
+            ['name' => 'Denmark', 'code' => 'DK'],
+            ['name' => 'Djibouti', 'code' => 'DJ'],
+            ['name' => 'Dominica', 'code' => 'DM'],
+            ['name' => 'Dominican Republic', 'code' => 'DO'],
+            ['name' => 'Ecuador', 'code' => 'EC'],
+            ['name' => 'Egypt', 'code' => 'EG'],
+            ['name' => 'El Salvador', 'code' => 'SV'],
+            ['name' => 'Equatorial Guinea', 'code' => 'GQ'],
+            ['name' => 'Eritrea', 'code' => 'ER'],
+            ['name' => 'Estonia', 'code' => 'EE'],
+            ['name' => 'Ethiopia', 'code' => 'ET'],
+            ['name' => 'Falkland Islands (Malvinas)', 'code' => 'FK'],
+            ['name' => 'Faroe Islands', 'code' => 'FO'],
+            ['name' => 'Fiji', 'code' => 'FJ'],
+            ['name' => 'Finland', 'code' => 'FI'],
+            ['name' => 'France', 'code' => 'FR'],
+            ['name' => 'French Guiana', 'code' => 'GF'],
+            ['name' => 'French Polynesia', 'code' => 'PF'],
+            ['name' => 'French Southern Territories', 'code' => 'TF'],
+            ['name' => 'Gabon', 'code' => 'GA'],
+            ['name' => 'Gambia', 'code' => 'GM'],
+            ['name' => 'Georgia', 'code' => 'GE'],
+            ['name' => 'Germany', 'code' => 'DE'],
+            ['name' => 'Ghana', 'code' => 'GH'],
+            ['name' => 'Gibraltar', 'code' => 'GI'],
+            ['name' => 'Greece', 'code' => 'GR'],
+            ['name' => 'Greenland', 'code' => 'GL'],
+            ['name' => 'Grenada', 'code' => 'GD'],
+            ['name' => 'Guadeloupe', 'code' => 'GP'],
+            ['name' => 'Guam', 'code' => 'GU'],
+            ['name' => 'Guatemala', 'code' => 'GT'],
+            ['name' => 'Guernsey', 'code' => 'GG'],
+            ['name' => 'Guinea', 'code' => 'GN'],
+            ['name' => 'Guinea-Bissau', 'code' => 'GW'],
+            ['name' => 'Guyana', 'code' => 'GY'],
+            ['name' => 'Haiti', 'code' => 'HT'],
+            ['name' => 'Heard Island and Mcdonald Islands', 'code' => 'HM'],
+            ['name' => 'Holy See (Vatican City State)', 'code' => 'VA'],
+            ['name' => 'Honduras', 'code' => 'HN'],
+            ['name' => 'Hong Kong', 'code' => 'HK'],
+            ['name' => 'Hungary', 'code' => 'HU'],
+            ['name' => 'Iceland', 'code' => 'IS'],
+            ['name' => 'India', 'code' => 'IN'],
+            ['name' => 'Indonesia', 'code' => 'ID'],
+            ['name' => 'Iran, Islamic Republic Of', 'code' => 'IR'],
+            ['name' => 'Iraq', 'code' => 'IQ'],
+            ['name' => 'Ireland', 'code' => 'IE'],
+            ['name' => 'Isle of Man', 'code' => 'IM'],
+            ['name' => 'Israel', 'code' => 'IL'],
+            ['name' => 'Italy', 'code' => 'IT'],
+            ['name' => 'Jamaica', 'code' => 'JM'],
+            ['name' => 'Japan', 'code' => 'JP'],
+            ['name' => 'Jersey', 'code' => 'JE'],
+            ['name' => 'Jordan', 'code' => 'JO'],
+            ['name' => 'Kazakhstan', 'code' => 'KZ'],
+            ['name' => 'Kenya', 'code' => 'KE'],
+            ['name' => 'Kiribati', 'code' => 'KI'],
+            ['name' => 'Korea, Democratic People\'S Republic of', 'code' => 'KP'],
+            ['name' => 'Korea, Republic of', 'code' => 'KR'],
+            ['name' => 'Kuwait', 'code' => 'KW'],
+            ['name' => 'Kyrgyzstan', 'code' => 'KG'],
+            ['name' => 'Lao People\'S Democratic Republic', 'code' => 'LA'],
+            ['name' => 'Latvia', 'code' => 'LV'],
+            ['name' => 'Lebanon', 'code' => 'LB'],
+            ['name' => 'Lesotho', 'code' => 'LS'],
+            ['name' => 'Liberia', 'code' => 'LR'],
+            ['name' => 'Libyan Arab Jamahiriya', 'code' => 'LY'],
+            ['name' => 'Liechtenstein', 'code' => 'LI'],
+            ['name' => 'Lithuania', 'code' => 'LT'],
+            ['name' => 'Luxembourg', 'code' => 'LU'],
+            ['name' => 'Macao', 'code' => 'MO'],
+            ['name' => 'Macedonia, The Former Yugoslav Republic of', 'code' => 'MK'],
+            ['name' => 'Madagascar', 'code' => 'MG'],
+            ['name' => 'Malawi', 'code' => 'MW'],
+            ['name' => 'Malaysia', 'code' => 'MY'],
+            ['name' => 'Maldives', 'code' => 'MV'],
+            ['name' => 'Mali', 'code' => 'ML'],
+            ['name' => 'Malta', 'code' => 'MT'],
+            ['name' => 'Marshall Islands', 'code' => 'MH'],
+            ['name' => 'Martinique', 'code' => 'MQ'],
+            ['name' => 'Mauritania', 'code' => 'MR'],
+            ['name' => 'Mauritius', 'code' => 'MU'],
+            ['name' => 'Mayotte', 'code' => 'YT'],
+            ['name' => 'Mexico', 'code' => 'MX'],
+            ['name' => 'Micronesia, Federated States of', 'code' => 'FM'],
+            ['name' => 'Moldova, Republic of', 'code' => 'MD'],
+            ['name' => 'Monaco', 'code' => 'MC'],
+            ['name' => 'Mongolia', 'code' => 'MN'],
+            ['name' => 'Montserrat', 'code' => 'MS'],
+            ['name' => 'Morocco', 'code' => 'MA'],
+            ['name' => 'Mozambique', 'code' => 'MZ'],
+            ['name' => 'Myanmar', 'code' => 'MM'],
+            ['name' => 'Namibia', 'code' => 'NA'],
+            ['name' => 'Nauru', 'code' => 'NR'],
+            ['name' => 'Nepal', 'code' => 'NP'],
+            ['name' => 'Netherlands', 'code' => 'NL'],
+            ['name' => 'Netherlands Antilles', 'code' => 'AN'],
+            ['name' => 'New Caledonia', 'code' => 'NC'],
+            ['name' => 'New Zealand', 'code' => 'NZ'],
+            ['name' => 'Nicaragua', 'code' => 'NI'],
+            ['name' => 'Niger', 'code' => 'NE'],
+            ['name' => 'Nigeria', 'code' => 'NG'],
+            ['name' => 'Niue', 'code' => 'NU'],
+            ['name' => 'Norfolk Island', 'code' => 'NF'],
+            ['name' => 'Northern Mariana Islands', 'code' => 'MP'],
+            ['name' => 'Norway', 'code' => 'NO'],
+            ['name' => 'Oman', 'code' => 'OM'],
+            ['name' => 'Pakistan', 'code' => 'PK'],
+            ['name' => 'Palau', 'code' => 'PW'],
+            ['name' => 'Palestinian Territory, Occupied', 'code' => 'PS'],
+            ['name' => 'Panama', 'code' => 'PA'],
+            ['name' => 'Papua New Guinea', 'code' => 'PG'],
+            ['name' => 'Paraguay', 'code' => 'PY'],
+            ['name' => 'Peru', 'code' => 'PE'],
+            ['name' => 'Philippines', 'code' => 'PH'],
+            ['name' => 'Pitcairn', 'code' => 'PN'],
+            ['name' => 'Poland', 'code' => 'PL'],
+            ['name' => 'Portugal', 'code' => 'PT'],
+            ['name' => 'Puerto Rico', 'code' => 'PR'],
+            ['name' => 'Qatar', 'code' => 'QA'],
+            ['name' => 'Reunion', 'code' => 'RE'],
+            ['name' => 'Romania', 'code' => 'RO'],
+            ['name' => 'Russian Federation', 'code' => 'RU'],
+            ['name' => 'RWANDA', 'code' => 'RW'],
+            ['name' => 'Saint Helena', 'code' => 'SH'],
+            ['name' => 'Saint Kitts and Nevis', 'code' => 'KN'],
+            ['name' => 'Saint Lucia', 'code' => 'LC'],
+            ['name' => 'Saint Pierre and Miquelon', 'code' => 'PM'],
+            ['name' => 'Saint Vincent and the Grenadines', 'code' => 'VC'],
+            ['name' => 'Samoa', 'code' => 'WS'],
+            ['name' => 'San Marino', 'code' => 'SM'],
+            ['name' => 'Sao Tome and Principe', 'code' => 'ST'],
+            ['name' => 'Saudi Arabia', 'code' => 'SA'],
+            ['name' => 'Senegal', 'code' => 'SN'],
+            ['name' => 'Serbia and Montenegro', 'code' => 'CS'],
+            ['name' => 'Seychelles', 'code' => 'SC'],
+            ['name' => 'Sierra Leone', 'code' => 'SL'],
+            ['name' => 'Singapore', 'code' => 'SG'],
+            ['name' => 'Slovakia', 'code' => 'SK'],
+            ['name' => 'Slovenia', 'code' => 'SI'],
+            ['name' => 'Solomon Islands', 'code' => 'SB'],
+            ['name' => 'Somalia', 'code' => 'SO'],
+            ['name' => 'South Africa', 'code' => 'ZA'],
+            ['name' => 'South Georgia and the South Sandwich Islands', 'code' => 'GS'],
+            ['name' => 'Spain', 'code' => 'ES'],
+            ['name' => 'Sri Lanka', 'code' => 'LK'],
+            ['name' => 'Sudan', 'code' => 'SD'],
+            ['name' => 'Suriname', 'code' => 'SR'],
+            ['name' => 'Svalbard and Jan Mayen', 'code' => 'SJ'],
+            ['name' => 'Swaziland', 'code' => 'SZ'],
+            ['name' => 'Sweden', 'code' => 'SE'],
+            ['name' => 'Switzerland', 'code' => 'CH'],
+            ['name' => 'Syrian Arab Republic', 'code' => 'SY'],
+            ['name' => 'Taiwan, Province of China', 'code' => 'TW'],
+            ['name' => 'Tajikistan', 'code' => 'TJ'],
+            ['name' => 'Tanzania, United Republic of', 'code' => 'TZ'],
+            ['name' => 'Thailand', 'code' => 'TH'],
+            ['name' => 'Timor-Leste', 'code' => 'TL'],
+            ['name' => 'Togo', 'code' => 'TG'],
+            ['name' => 'Tokelau', 'code' => 'TK'],
+            ['name' => 'Tonga', 'code' => 'TO'],
+            ['name' => 'Trinidad and Tobago', 'code' => 'TT'],
+            ['name' => 'Tunisia', 'code' => 'TN'],
+            ['name' => 'Turkey', 'code' => 'TR'],
+            ['name' => 'Turkmenistan', 'code' => 'TM'],
+            ['name' => 'Turks and Caicos Islands', 'code' => 'TC'],
+            ['name' => 'Tuvalu', 'code' => 'TV'],
+            ['name' => 'Uganda', 'code' => 'UG'],
+            ['name' => 'Ukraine', 'code' => 'UA'],
+            ['name' => 'United Arab Emirates', 'code' => 'AE'],
+            ['name' => 'United Kingdom', 'code' => 'GB'],
+            ['name' => 'United States', 'code' => 'US'],
+            ['name' => 'United States Minor Outlying Islands', 'code' => 'UM'],
+            ['name' => 'Uruguay', 'code' => 'UY'],
+            ['name' => 'Uzbekistan', 'code' => 'UZ'],
+            ['name' => 'Vanuatu', 'code' => 'VU'],
+            ['name' => 'Venezuela', 'code' => 'VE'],
+            ['name' => 'Viet Nam', 'code' => 'VN'],
+            ['name' => 'Virgin Islands, British', 'code' => 'VG'],
+            ['name' => 'Virgin Islands, U.S.', 'code' => 'VI'],
+            ['name' => 'Wallis and Futuna', 'code' => 'WF'],
+            ['name' => 'Western Sahara', 'code' => 'EH'],
+            ['name' => 'Yemen', 'code' => 'YE'],
+            ['name' => 'Zambia', 'code' => 'ZM'],
+            ['name' => 'Zimbabwe', 'code' => 'ZW'],
+        ];
+        DB::table('countries')->insert($countries);
+
+Then, Command: php artisan db:seed --class=CountrySeeder
+
+
+***Boundle:
+-----------
+Model, Migration, Controller, Seeder Create Command:
+php artisan make:model seeder Cities -mcs
+
+
+
+
+
+
+
+
+
+26 => Laravel 12 - Raw SQL vs Query Builder vs Eloquent:
+--------------------------------------------------------
+26. A) Best option Eloquent ORM
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+Approach		Security		Performance			Flexibility			Maintainability
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+Raw SQL			High Risk of SQL	Fastest because it		Fully customizable		Harder to maintain and
+			injection if not	directly interacts with		allows complex queries		debug, requires manual
+			property handled	the database							query writing
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+Query Builder		Protects against	Faster than Eloquent but	Flexible, allows complex	Easier to maintain than
+			SQL injection		slightly slower than Raw SQL	queries with readable syntax	Raw Sql but lacks full ORM Capabilites
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+Eloquent ORM		Highly Secure,		Slowest due to			Less flexible for		Easiest to maintain
+			Prevents SQL		abstraction overhead		highly optimized queries	follows object-oriented
+			injection										Principles
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+26. B) Best Use Case Query Builder
+Raw SQL:	When performance is critical or complex queries are needed.
+Query Builder:	When you need a balance between performance, securyity, and flexibility
+Eloquent ORM:	When working with models, relationships, and prioritizing maintainability
+
+
+
+
+
+
+
+27 => Laravel 12 - How to Insert Data Using Query Builder:
+----------------------------------------------------------
+27. A). i) Edit app>http>controller>TeacherController.php:
+// Add Data
+    public function add()
+    {
+        DB::table('teachers')->insert([
+            'name'    => 'Shimul',
+            'address' => 'Mymunsing',
+        ]);
+        return "Data Added Successfully!";
+    }
+
+// Multiple Data Add
+    public function add()
+    {
+        DB::table('teachers')->insert([
+            [
+                'name'    => 'Runad',
+                'address' => 'Shippur',
+            ],
+            [
+                'name'    => 'Rana',
+                'address' => 'Rasulpur',
+            ],
+            [
+                'name'    => 'Murad',
+                'address' => 'Kumedpur',
+
+            ],
+        ]);
+        return "Data Added Successfully!";
+    }
+
+
+27. A. ii) Create Route>web.php:
+Route::get('/teachers-add', [TeacherController::class, 'add']);
+
+
+
+
+
+
+28 => Laravel 12  - How to Fetch Data Using Query Builder:
+----------------------------------------------------------
+28. A) Edit app>http>controller>TeacherController.php:
+// Get Data
+    public function getData()
+    {
+        // // All Data
+        // $item = DB::table('teachers')
+        //     ->get();
+
+        // // Two Data
+        // $item = DB::table('teachers')
+        //     ->limit(2)
+        //     ->get();
+
+        // // First Single Data
+        // $item = DB::table('teachers')
+        //     ->first();
+
+        // // Where id = 101
+        // $item = DB::table('teachers')
+        //     ->where('id', 101)
+        //     ->first();
+
+        // Where id = 101, Only Name
+        $item = DB::table('teachers')
+            ->select('name')
+            ->where('id', 101)
+            ->get();
+        return $item;
+    }
+
+
+28. B) Create Route>web.php:
+Route::get('/teachers', [TeacherController::class, 'getData']);
+
+
+
+
+
+
+
+
+
+29 => Laravel 12 - How to Update Data Using Query Builder:
+----------------------------------------------------------
+29. A) Edit app>http>controller>TeacherController.php:
+// Update
+    public function update()
+    {
+        DB::table('teachers')
+            ->where('id', 110)->update([
+            'name'    => "Murad Khan",
+            'address' => "Kumedpur Union",
+        ]);
+        return "Updated Successfully!";
+    }
+
+
+29. B) Create Route>web.php:
+Route::get('/teachers-update', [TeacherController::class, 'update']);
+
+
+
+
+
+
+
+
+30 => Laravel 12 - How to Delete Records Using Query Builder:
+-------------------------------------------------------------
+30. A) Edit app>http>controller>TeacherController.php:
+// Delete
+    public function destroy()
+    {
+        DB::table('teachers')
+            ->where('id', 110)
+            ->delete();
+        return "Deleted Successfully!";
+    }
+
+
+29. B) Create Route>web.php:
+Route::get('/teachers-destroy', [TeacherController::class, 'destroy']);
 
 
 
