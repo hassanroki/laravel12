@@ -1269,8 +1269,369 @@ Route::get('/teachers-update', [TeacherController::class, 'update']);
     }
 
 
-29. B) Create Route>web.php:
+30. B) Create Route>web.php:
 Route::get('/teachers-destroy', [TeacherController::class, 'destroy']);
+
+
+
+
+
+
+
+31 => Laravel 12 – How to Use Aggregate Functions in Query Builder:
+-------------------------------------------------------------------
+31. A) Edit app>http>controller>TeacherController.php:
+// Get Data
+    public function getData()
+    {
+        // // Count
+        // $item = DB::table('teachers')
+        //     ->count();
+        // return $item;
+
+        // // Max Score
+        // $item = DB::table('teachers')
+        //     ->max('scores');
+        // return $item;
+
+        // // Minimum Score
+        // $item = DB::table('teachers')
+        //     ->min('scores');
+        // return $item;
+
+        // Average Score
+        $item = DB::table('teachers')
+            ->avg('scores');
+        return $item;
+    }
+
+
+
+
+
+
+
+
+32 => Laravel 12 - How to Add Data Using Eloquent ORM:
+------------------------------------------------------
+32. A) Edit app>http>controller>TeacherController.php:
+// Add Data
+    public function add()
+    {
+        $item          = new Teacher();
+        $item->name    = 'Babu';
+        $item->address = "Chitagonj";
+        $item->scores  = 66;
+        $item->save();
+        return "Data Added Successfully!";
+    }
+
+
+
+
+
+
+33 => Laravel 12 - How to Fetch Data Using Eloquent ORM:
+--------------------------------------------------------
+33. A) Edit app>http>controller>TeacherController.php:
+// Get Data
+    public function getData()
+    {
+        // All Data Fetch
+        // $items = Teacher::get();
+
+        // Alternate All Data Fetch
+        // $items = Teacher::all();
+
+        // All Data Fetch Only Id and Name
+        $items = Teacher::select('id', 'name')->get();
+
+        // Only 55 Id
+        $items = Teacher::select('id', 'name')
+            ->where('id', '55')
+            ->get();
+
+        // Alternate Way
+        $items = Teacher::select('id', 'name')
+            ->find(55);
+        return $items;
+    }
+
+
+
+
+
+34 => Laravel 12 - How to Update Data Using Eloquent ORM:
+---------------------------------------------------------
+34. A) Edit app>http>controller>TeacherController.php:
+// Update
+    public function update()
+    {
+        // $item = Teacher::where('id', 101)->first();
+        // Alternate Way
+        $item=Teacher::findOrFail(101);
+        $item->name="BabuMia";
+        $item->address="Doha";
+        $item->scores=99;
+        $item->update();
+        return "Updated Successfully!";
+    }
+
+
+
+
+
+
+35 => Laravel 12 - How to Delete Data Records Using Eloquent ORM:
+-----------------------------------------------------------------
+35. A) Edit app>http>controller>TeacherController.php:
+// Delete
+    public function destroy()
+    {
+       $item = Teacher::findOrFail(101);
+       $item->delete();
+        return "Deleted Successfully!";
+    }
+
+
+
+
+
+
+
+36 => Laravel 12 - How to Use Where Conditions:
+-----------------------------------------------
+36. A) Edit app>http>controller>TeacherController.php:
+// Where Conditions
+    public function whereConditions()
+    {
+        // // Data Find Where Greater than 98 Scores
+        // $items = Teacher::where('scores', '>', 98)->get();
+        // return $items;
+
+        // // Data Find Where Greater than 50 Scores and With Out Where age 20-30
+        // $items = Teacher::where('scores', '>', 50)
+        //     ->where(function ($query) {
+        //         $query->where('age', '<', 20)
+        //             ->orWhere('age', '>', 30);
+        //     })
+        //     ->get();
+
+        // // Where Between: 10-25
+        // $items = Teacher::whereBetween('age', [10,25])->get();
+
+        // // Where Not Between: 20 & 25
+        // $items = Teacher::whereNotBetween('age', [20, 25])->get();
+
+        // // WhereIn: 1,2,3,5,7
+        // $items = Teacher::whereIn('id', [1,2,3,5,7])->get();
+
+        // WhereNotIn: 1,2,3,5,7
+        $items = Teacher::whereNotIn('id', [1, 2, 3, 5, 7])->get();
+        return $items;
+    }
+
+
+
+
+
+
+
+
+37 => Laravel 12 - Using whereAll and whereAny Conditions:
+----------------------------------------------------------
+37. A) Edit app>http>controller>TeacherController.php:
+// Where Conditions
+    public function whereConditions()
+    {
+        // // Where Any: If match age or scores 25
+        // $items = Teacher::whereAny(['age', 'scores'], '=', 25)
+        //     ->get();
+
+        // Where All: All match age and scores and id 20
+        $items = Teacher::whereAll(['age', 'scores', 'id'], 20)
+            ->get();
+        return $items;
+    }
+
+
+
+
+
+
+
+
+
+38 => Laravel 12 - Master Query Scopes for Cleaner & Resuable Queries!:
+-----------------------------------------------------------------------
+38. A) Edit app>http>controller>TeacherController.php:
+public function queryScope()
+    {
+        $items = Teacher::Something1()->get();
+        return $items;
+    }
+
+    public function secondQuery(){
+        $items = Teacher::Something2()
+            ->get();
+        return $items;
+    }
+
+
+38. B) Edit app>Models>Teacher.php:
+// Scope Male
+    public function scopeSomething1($query)
+    {
+        $return = $query->where('scores', 25)
+            ->where('age', 25);
+    }
+
+    // Scope Female
+    public function scopeSomething2($query)
+    {
+        $return = $query->where('scores', 20)
+            ->where('age', 20);
+    }
+
+
+
+38. C) Create Route>web.php:
+Route::get('/query-scope', [TeacherController::class, 'queryScope']);
+Route::get('/second-query', [TeacherController::class, 'secondQuery']);
+
+
+
+
+
+
+
+39 => Laravel 12 - Master Soft Deletes & Restore Delete Records!:
+-----------------------------------------------------------------
+39. A) Soft Delete:
+39. A. i) SoftDeletes Column Add
+Edit Database>migrations>2025_05_29_114656_create_teachers_table.php:
+ Schema::create('teachers', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->enum('gender', ['m', 'f'])->default('m')->comment('m=male', 'f=female');
+            $table->string('address');
+            $table->integer('scores');
+            $table->integer('age');
+            $table->softDeletes();
+            $table->timestamps();
+        });
+
+
+
+39. A. ii) Edit app>Models>Teacher.php:
+// SoftDeletes Column
+    use SoftDeletes;
+
+
+39. A. iii) Edit app>http>controller>TeacherController.php:
+// Delete
+    public function destroy()
+    {
+        $item = Teacher::findOrFail(1);
+        $item->delete();
+        return "Deleted Successfully!";
+    }
+
+
+
+39. A. iv) Create Route>web.php:
+Route::get('/teachers-destroy', [TeacherController::class, 'destroy']);
+
+
+
+
+
+
+39. B) Delete Records Show:
+39. B. i) Edit app>http>controller>TeacherController.php:
+// Get Data
+    public function getData()
+    {
+        // // Delete Records With Data Show
+        // $items = Teacher::withTrashed()->get();
+
+        // Only Delete Records Show
+        $items = Teacher::onlyTrashed()->get();
+
+        return $items;
+    }
+
+
+39. B. ii) Create Route>web.php:
+Route::get('/teachers', [TeacherController::class, 'getData']);
+
+
+
+
+39. C) Delte Data Restore:
+39. C. i) Edit app>http>controller>TeacherController.php:
+public function getData()
+    {
+        // Only Delete Records Show
+        $items = Teacher::withTrashed()->find(1)->restore();
+
+        return $items;
+    }
+
+
+
+39. C. ii) Create Route>web.php:
+Route::get('/teachers', [TeacherController::class, 'getData']);
+
+
+
+
+39. D) Permanent Delete:
+39. D. i) Edit app>http>controller>TeacherController.php:
+// Delete
+    public function destroy()
+    {
+        $item = Teacher::findOrFail(1);
+        $item->forceDelete();
+        return "Deleted Successfully!";
+    }
+
+
+39. D. ii) Create Route>web.php:
+Route::get('/teachers-destroy', [TeacherController::class, 'destroy']);
+
+
+
+
+
+
+
+40, 41 => Laravel 12 - Learn CRUD(Read) with Eloquent, Implement Table Filters for Dynamic Search:
+--------------------------------------------------------------------------------------------------
+40. A. i) Create Route>web.php:
+// Teacher
+Route::prefix('/teacher')->controller(TeacherController::class)->group(function () {
+    Route::get('/', 'index');
+});
+
+
+
+40. A. ii) Edit app>http>controller>TeacherController.php:
+
+
+
+
+40. A. iii) Create list.blade.php
+Edit Resources>teacher>list.blade.php:
+
+
+
+
+
+
+
+
+
 
 
 

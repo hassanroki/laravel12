@@ -1,77 +1,24 @@
 <?php
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\DB;
+use App\Models\Teacher;
+use Illuminate\Http\Request;
 
 class TeacherController extends Controller
 {
-    // Add Data
-    public function add()
+    public function index(Request $request)
     {
-        DB::table('teachers')->insert([
-            [
-                'name'    => 'Runad',
-                'address' => 'Shippur',
-            ],
-            [
-                'name'    => 'Rana',
-                'address' => 'Rasulpur',
-            ],
-            [
-                'name'    => 'Murad',
-                'address' => 'Kumedpur',
+        $teachers = Teacher::when($request->search, function ($query) use ($request) {
+            return $query->whereAny([
+                'name',
+                'age',
+                'email',
+                'dob',
+                'scores',
+                'gender',
+            ], 'like', '%' . $request->search . '%');
+        })->get();
 
-            ],
-        ]);
-        return "Data Added Successfully!";
-    }
-
-    // Get Data
-    public function getData()
-    {
-        // // All Data
-        // $item = DB::table('teachers')
-        //     ->get();
-
-        // // Two Data
-        // $item = DB::table('teachers')
-        //     ->limit(2)
-        //     ->get();
-
-        // // First Single Data
-        // $item = DB::table('teachers')
-        //     ->first();
-
-        // // Where id = 101
-        // $item = DB::table('teachers')
-        //     ->where('id', 101)
-        //     ->first();
-
-        // Where id = 101, Only Name
-        $item = DB::table('teachers')
-            ->select('name')
-            ->where('id', 101)
-            ->get();
-        return $item;
-    }
-
-    // Update
-    public function update()
-    {
-        DB::table('teachers')
-            ->where('id', 110)->update([
-            'name'    => "Murad Khan",
-            'address' => "Kumedpur Union",
-        ]);
-        return "Updated Successfully!";
-    }
-
-    // Delete
-    public function destroy()
-    {
-        DB::table('teachers')
-            ->where('id', 110)
-            ->delete();
-        return "Deleted Successfully!";
+        return view('teacher.list', compact('teachers'));
     }
 }

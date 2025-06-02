@@ -14,9 +14,15 @@ return new class extends Migration
         Schema::create('teachers', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('address');
+            $table->string('email')->unique();
+            $table->integer('age');
+            $table->date('dob');                                                           // Corrected from integer to date
+            $table->enum('gender', ['m', 'f'])->default('m')->comment('m=male, f=female'); // Corrected comment syntax
+            $table->integer('scores');
+            $table->softDeletes();
             $table->timestamps();
         });
+
     }
 
     /**

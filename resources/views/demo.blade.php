@@ -11,7 +11,6 @@
     <div class="demo">
         <h2 class="text-center">Demo</h2>
     </div>
-    <script src="{{ asset('assets/js/bootstrap.min.js') }}"></script>
     <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
 </body>
 </html>
