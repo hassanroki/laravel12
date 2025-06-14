@@ -1,10 +1,7 @@
 <?php
 
 use App\Http\Controllers\CountryController;
-use App\Http\Controllers\SecondTestController;
-use App\Http\Controllers\StudentController;
 use App\Http\Controllers\TeacherController;
-use App\Http\Controllers\TestController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -19,6 +16,11 @@ Route::get('/demo', function () {
 // Teacher
 Route::prefix('/teacher')->controller(TeacherController::class)->group(function () {
     Route::get('/', 'index')->name('teacher.index');
+    Route::get('/add', 'add')->name('teacher.add');
+    Route::post('/create', 'create')->name('teacher.create');
+    Route::get('/edit/{id}', 'edit')->name('teacher.edit');
+    Route::post('/edit/{id}', 'update')->name('teacher.update');
+    Route::delete('/delete/{id}', 'destroy')->name('teacher.destroy');
 });
 
 // Country

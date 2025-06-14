@@ -1,0 +1,40 @@
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.main {
+    flex: 1;
+}
+
+.sidebar {
+    background-color: #f8f9fa;
+    padding: 20px;
+    min-height: 100%;
+}
+
+.table th,
+.table td {
+    vertical-align: middle;
+    text-align: left;
+}
+
+.footer {
+    background-color: #004080;
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+}
+
+.navbar {
+    background-color: #004080;
+}
+
+.navbar a {
+    color: white !important;
+}
+
+h2 {
+    color: #004080;
+}

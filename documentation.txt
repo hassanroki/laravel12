@@ -1611,20 +1611,468 @@ Route::get('/teachers-destroy', [TeacherController::class, 'destroy']);
 40. A. i) Create Route>web.php:
 // Teacher
 Route::prefix('/teacher')->controller(TeacherController::class)->group(function () {
-    Route::get('/', 'index');
+    Route::get('/', 'index')->name('teacher.index');
 });
 
 
 
 40. A. ii) Edit app>http>controller>TeacherController.php:
+public function index(Request $request)
+    {
+        $teachers = Teacher::when($request->search, function ($query) use ($request) {
+            return $query->whereAny([
+                'name',
+                'age',
+                'email',
+                'dob',
+                'scores',
+                'gender',
+            ], 'like', '%' . $request->search . '%');
+        })->get();
 
+        return view('teacher.list', compact('teachers'));
+    }
 
 
 
 40. A. iii) Create list.blade.php
 Edit Resources>teacher>list.blade.php:
+@extends('layouts.app')
+@section('styles')
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main {
+            flex: 1;
+        }
+
+        .sidebar {
+            background-color: #f8f9fa;
+            padding: 20px;
+            min-height: 100%;
+        }
+
+        .table th,
+        .table td {
+            vertical-align: middle;
+            text-align: left;
+        }
+
+        .footer {
+            background-color: #004080;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        .navbar {
+            background-color: #004080;
+        }
+
+        .navbar a {
+            color: white !important;
+        }
+
+        h2 {
+            color: #004080;
+        }
+    </style>
+@endsection
+
+@section('content')
+    <!-- Main Content -->
+    <div class="col-md-10 p-4">
+        <h2 class="text-center mb-4">Teacher</h2>
+        <form action="{{ route('teacher.index') }}" method="GET">
+            <div class="input-group mb-3 justify-content-center">
+                <input type="text" class="form-control w-50" placeholder="Search" id="search" name="search" value="{{ request('search') }}">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+        </form>
+        <table class="table table-bordered table-striped">
+            <thead class="table-primary">
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Age</th>
+                    <th>Date of Birth</th>
+                    <th>Gender</th>
+                    <th>Score</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data rows go here -->
+                @foreach ($teachers as $teacher)
+                    <tr>
+                        <td>{{ $teacher->id }}</td>
+                        <td>{{ $teacher->name }}</td>
+                        <td>{{ $teacher->email }}</td>
+                        <td>{{ $teacher->age }}</td>
+                        <td>{{ $teacher->dob }}</td>
+                        <td>{{ $teacher->gender }}</td>
+                        <td>{{ $teacher->scores }}</td>
+                        <td class="d-flex">
+                            <a href="#" class="btn btn-info btn-sm">Edit</a>
+                            <a href="#" class="btn btn-danger btn-sm">Delete</a>
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+@endsection
+
+@section('scripts')
+    <script></script>
+@endsection
 
 
+
+
+
+
+
+42 => Laravel 12 - Add Pagination for Better Data Navigation:
+-------------------------------------------------------------
+42. A. i) Edit app>http>controller>TeacherController.php:
+public function index(Request $request)
+    {
+        $teachers = Teacher::when($request->search, function ($query) use ($request) {
+            return $query->whereAny([
+                'name',
+                'age',
+                'email',
+                'dob',
+                'scores',
+                'gender',
+            ], 'like', '%' . $request->search . '%');
+        })->paginate(10);
+
+        return view('teacher.list', compact('teachers'));
+    }
+
+
+
+
+42. A. ii) Edit Resources>teacher>list.blade.php:
+<div class="paginationDiv">
+        {{ $teachers->appends(request()->query())->links('pagination::bootstrap-5') }}
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+43 => Laravel 12 - Learn CRUD(Create) Eloquent!:
+------------------------------------------------
+43. A. i) Create Route>web.php:
+// Teacher
+Route::prefix('/teacher')->controller(TeacherController::class)->group(function () {
+    Route::get('/add', 'add')->name('teacher.add');
+    Route::post('/create', 'create')->name('teacher.create');
+});
+
+
+43. A. ii) Edit app>http>controller>TeacherController.php:
+// Add
+    public function add()
+    {
+        return view('teacher.create');
+    }
+
+    // Create
+    public function create(Request $request)
+    {
+        $teacher         = new Teacher();
+        $teacher->name   = $request->name;
+        $teacher->email  = $request->email;
+        $teacher->dob    = $request->dob;
+        $teacher->age    = $request->age;
+        $teacher->gender = $request->gender;
+        $teacher->scores = $request->scores;
+        $teacher->save();
+
+        return redirect()->route('teacher.index');
+    }
+
+
+
+43. A. iii) Edit Resources>views>teacher>list.blade.php
+<a href="{{ route('teacher.add') }}" class="btn btn-info">Add Student</a>
+
+
+43. A. iv) Create View: create.blade.php
+Edit Resources>views>teacher>create.blade.php:
+@extends('layouts.app')
+@section('styles')
+    <style>
+
+    </style>
+@endsection
+
+@section('content')
+    <!-- Main Content -->
+    <div class="col-md-10 p-4">
+        <div class="form-container">
+            <h5 class="text-white bg-primary p-2 rounded">Teacher Registration</h5>
+            <form action="{{ route('teacher.create') }}" method="POST">
+                @csrf
+                <div class="mb-3">
+                    <label class="form-label">Name</label>
+                    <input type="text" name="name" class="form-control" placeholder="Enter name">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="email" class="form-control" placeholder="Enter email">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Age</label>
+                    <input type="number" name="age" class="form-control" placeholder="Enter age">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Date of Birth</label>
+                    <input type="date" name="dob" class="form-control" placeholder="Enter age">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Gender</label><br>
+                    <div class="form-check form-check-inline">
+                        <input type="radio" class="form-check-input" name="gender" id="male" value="m" checked>
+                        <label for="male" class="form-check-label">Male</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input type="radio" class="form-check-input" name="gender" id="female" value="f">
+                        <label for="female" class="form-check-label">Female</label>
+                    </div>
+                </div>
+
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Score</label>
+            <input type="number" name="scores" class="form-control" placeholder="Enter score" value="0">
+        </div>
+        <button type="submit" class="btn btn-success">Submit</button>
+        </form>
+    </div>
+    </div>
+@endsection
+
+@section('scripts')
+    <script></script>
+@endsection
+
+
+
+
+
+
+
+44 => Laravel 12 - Learn CRUD (Update) with Eloquent:
+-----------------------------------------------------
+44. A. i)) Create Route>web.php:
+// Teacher
+Route::prefix('/teacher')->controller(TeacherController::class)->group(function () {
+    Route::get('/edit/{id}', 'edit')->name('teacher.edit');
+    Route::post('/edit/{id}', 'update')->name('teacher.update');
+});
+
+
+44. A. ii) Edit app>http>controller>TeacherController.php:
+// Edit
+    public function edit($id)
+    {
+        $teacher = Teacher::findOrFail($id);
+        return view('teacher.edit', compact('teacher'));
+    }
+
+    // Update
+    public function update(Request $request, $id)
+    {
+        $teacher         = Teacher::findOrFail($id);
+        $teacher->name   = $request->name;
+        $teacher->email  = $request->email;
+        $teacher->dob    = $request->dob;
+        $teacher->age    = $request->age;
+        $teacher->gender = $request->gender;
+        $teacher->scores = $request->scores;
+        $teacher->update();
+
+        return redirect()->route('teacher.index');
+    }
+
+
+
+44. A. iii) Edit Resources>views>teacher>list.blade.php:
+<a href="{{ route('teacher.edit', $teacher->id) }}" class="btn btn-info btn-sm">Edit</a>
+
+
+
+44. A. iv) Create View: edit.blade.php
+Edit Resources>views>teacher>edit.blade.php:
+@extends('layouts.app')
+@section('styles')
+    <style>
+
+    </style>
+@endsection
+
+@section('content')
+    <!-- Main Content -->
+    <div class="col-md-10 p-4">
+        <div class="form-container">
+            <h5 class="text-white bg-primary p-2 rounded">Student Edit</h5>
+            <form action="{{ route('teacher.update', $teacher->id) }}" method="POST">
+                @csrf
+                <div class="mb-3">
+                    <label class="form-label">Name</label>
+                    <input type="text" name="name" value="{{ $teacher->name }}" class="form-control"
+                        placeholder="Enter name">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="email" value="{{ $teacher->email }}" class="form-control"
+                        placeholder="Enter email">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Age</label>
+                    <input type="number" name="age" value="{{ $teacher->age }}" class="form-control"
+                        placeholder="Enter age">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Date of Birth</label>
+                    <input type="date" name="dob" value="{{ $teacher->dob }}" class="form-control"
+                        placeholder="Enter age">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Gender</label><br>
+                    <div class="form-check form-check-inline">
+                        <input type="radio" class="form-check-input" name="gender" id="male" value="m"
+                            {{ $teacher->gender == 'm' ? 'checked' : '' }}>
+                        <label for="male" class="form-check-label">Male</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input type="radio" class="form-check-input" name="gender" id="female" value="f"
+                            {{ $teacher->gender == 'f' ? 'checked' : '' }}>
+                        <label for="female" class="form-check-label">Female</label>
+                    </div>
+                </div>
+
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Score</label>
+            <input type="number" name="scores" value="{{ $teacher->scores }}" class="form-control"
+                placeholder="Enter score" value="0">
+        </div>
+        <button type="submit" class="btn btn-success">Update</button>
+        </form>
+    </div>
+    </div>
+@endsection
+
+@section('scripts')
+    <script></script>
+@endsection
+
+
+
+
+
+
+
+
+45 => Laravel 12 CRUD Tutorial - Delete Data from Database:
+-----------------------------------------------------------
+45.A.ii) Edit Resources>views>teacher>list.blade.php:
+<form action="{{ route('teacher.destroy', $teacher->id) }}" method="POST"
+                                onsubmit="return confirm('Are you sure you want to delete?')" style="displa:inline">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                            </form>
+
+
+
+45. A. ii) Create Route>web.php:
+Route::prefix('/teacher')->controller(TeacherController::class)->group(function () {
+    Route::delete('/delete/{id}', 'destroy')->name('teacher.destroy');
+});
+
+
+
+45. A. iii) Edit app>htpp>controller>TeacherController.php:
+// Delete
+    public function destroy(Request $request, $id)
+    {
+        $teacher = Teacher::findOrFail($id);
+        $teacher->delete();
+        return redirect()->route('teacher.index');
+    }
+
+
+
+
+
+
+
+
+
+
+45 => Laravel 12 CRUD Tutorial - Validate User inout the Right Way:
+-------------------------------------------------------------------
+45. A. i) Edit Resources>views>teacher>create.blade.php:
+@if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+
+
+45. B. ii) Edit app>http>controller>TeacherController.php:
+// Create
+    public function create(Request $request)
+    {
+        // Validation
+        $request->validate([
+            'name'   => 'required|string|max:255',
+            'email'  => 'required|email|unique:teachers,email',
+            'age'    => 'required|integer|min:1|max:100',
+            'dob'    => 'required|date',
+            'gender' => 'required|in:m,f',
+            'scores' => 'required|integer|min:1|max:100',
+        ], [
+            'name.required' => 'Please Write Teacher Name',
+            'age.max'       => 'Teacher can not be older than 100',
+            'email.email'   => 'Please enter a valid email address',
+            'email.unique'  => 'This email is already taken',
+        ]);
+
+        $teacher         = new Teacher();
+        $teacher->name   = $request->name;
+        $teacher->email  = $request->email;
+        $teacher->dob    = $request->dob;
+        $teacher->age    = $request->age;
+        $teacher->gender = $request->gender;
+        $teacher->scores = $request->scores;
+        $teacher->save();
+
+        return redirect()->route('teacher.index');
+    }
 
 
 
