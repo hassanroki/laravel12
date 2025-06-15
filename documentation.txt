@@ -2028,9 +2028,9 @@ Route::prefix('/teacher')->controller(TeacherController::class)->group(function 
 
 
 
-45 => Laravel 12 CRUD Tutorial - Validate User inout the Right Way:
+46 => Laravel 12 CRUD Tutorial - Validate User inout the Right Way:
 -------------------------------------------------------------------
-45. A. i) Edit Resources>views>teacher>create.blade.php:
+46. A. i) Edit Resources>views>teacher>create.blade.php:
 @if ($errors->any())
                 <div class="alert alert-danger">
                     <ul>
@@ -2043,7 +2043,7 @@ Route::prefix('/teacher')->controller(TeacherController::class)->group(function 
 
 
 
-45. B. ii) Edit app>http>controller>TeacherController.php:
+46. B. ii) Edit app>http>controller>TeacherController.php:
 // Create
     public function create(Request $request)
     {
@@ -2080,6 +2080,276 @@ Route::prefix('/teacher')->controller(TeacherController::class)->group(function 
 
 
 
+47 => Laravel 12 Form Request Vakudation | Clean & Organized Validation in Laravel:
+-----------------------------------------------------------------------------------
+47. A. i) Create Request
+Command: php artisan make:request TeacherAddRequest
+
+Edit app>http>request>TeacherAddRequest.php:
+<?php
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+/**
+ * TeacherAddRequest
+ *
+ * @property string $name
+ * @property string $email
+ * @property int $age
+ * @property string $dob
+ * @property string $gender
+ * @property int $scores
+ */
+
+class TeacherAddRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     */
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     */
+    public function rules(): array
+    {
+        return [
+            'name'   => 'required|string|max:255',
+            'email'  => 'required|email|unique:teachers,email',
+            'age'    => 'required|integer|min:1|max:100',
+            'dob'    => 'required|date',
+            'gender' => 'required|in:m,f',
+            'scores' => 'required|integer|min:1|max:100',
+        ];
+    }
+
+    // Messages
+    public function attributes()
+    {
+        return [
+            'name.required' => 'Please Write Teacher Name',
+            'age.max'       => 'Teacher can not be older than 100',
+            'email.email'   => 'Please enter a valid email address',
+            'email.unique'  => 'This email is already taken',
+        ];
+    }
+}
+
+
+
+47. A. ii) Edit app>http>controller>TeacherController.php:
+// Create
+    public function store(TeacherAddRequest $request)
+    {
+        $teacher         = new Teacher();
+        $teacher->name   = $request->name;
+        $teacher->email  = $request->email;
+        $teacher->dob    = $request->dob;
+        $teacher->age    = $request->age;
+        $teacher->gender = $request->gender;
+        $teacher->scores = $request->scores;
+        $teacher->save();
+
+        return redirect()->route('teacher.index');
+    }
+
+
+
+
+
+
+
+
+48 => Laravel 12 11 Adding Old Value:
+-------------------------------------
+48. A. i) Edit Resources>views>teacher>create.blade.php:
+<form action="{{ route('teacher.create') }}" method="POST">
+                @csrf
+                <div class="mb-3">
+                    <label class="form-label">Name</label>
+                    <input type="text" name="name" class="form-control" placeholder="Enter name"
+                        value="{{ old('name') }}">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="email" class="form-control" placeholder="Enter email"
+                        value="{{ old('email') }}">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Age</label>
+                    <input type="number" name="age" class="form-control" placeholder="Enter age"
+                        value="{{ old('age') }}">
+                </div>
+                
+               <div class="mb-3">
+                    <label class="form-label">Date of Birth</label>
+                    <input type="date" name="dob" class="form-control" placeholder="Enter age"
+                        value="{{ old('dob') }}">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Gender</label><br>
+                    <div class="form-check form-check-inline">
+                        <input type="radio" class="form-check-input" name="gender" id="male" value="m"
+                            {{ old('gender') == 'm' ? 'checked' : '' }}>
+                        <label for="male" class="form-check-label">Male</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input type="radio" class="form-check-input" name="gender" id="female" value="f"
+                            {{ old('gender') == 'f' ? 'checked' : '' }}>
+                        <label for="female" class="form-check-label">Female</label>
+                    </div>
+                </div>
+
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Score</label>
+            <input type="number" name="scores" class="form-control" placeholder="Enter score" value="{{ old('scores') }}">
+        </div>
+        <button type="submit" class="btn btn-success">Submit</button>
+        </form>
+
+
+
+
+
+
+
+
+
+49 => Laravel 12 Image Upload Tutorial | how to Upload & Store Images in Laravel:
+---------------------------------------------------------------------------------
+49. A. i) Add Images Column
+Command: php artisan make:migration AddImageToTeachersTable
+Edit Database>migration>2025_06_15_035931_add_image_to_teachers_table.php:
+public function up(): void
+    {
+        Schema::table('teachers', function (Blueprint $table) {
+            //
+            $table->string('image')->nullable(true);
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('teachers', function (Blueprint $table) {
+            //
+            $table->dropColumn('image');
+        });
+    }
+Then, Command: php artisan migrate
+
+
+
+
+49. A. ii) Edit Resources>views>teacher>create.blade.php;
+<form action="{{ route('teacher.create') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+        <div class="mb-3">
+            <label class="form-label" for="image">Image</label>
+            <input type="file" id="image" name="image" class="form-control" value="{{ old('image') }}"
+                accept="image/*">
+        </div>
+        <button type="submit" class="btn btn-success">Submit</button>
+        </form>
+
+
+
+
+
+49. A. iii) Edit app>htpp>request>TeacherAddRequest.php:
+<?php
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+/**
+ * TeacherAddRequest
+ * @property UploadedFile|null $image
+ * @method bool hasFile(string $key)
+ * @method UploadedFile file(string $key)
+ */
+
+class TeacherAddRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     */
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     */
+    public function rules(): array
+    {
+        return [
+            'image'  => 'nullable|image|mimes:png,jpg,gif|max:2048',
+        ];
+    }
+
+ 
+}
+
+
+49. A. iv) Edit app>http>controller>TeacherController.php;
+// Create
+    public function store(TeacherAddRequest $request)
+    {
+        $imgPath = null;
+        if ($request->hasFile('image')) {
+            $imgPath = $request->file('image')->store('photos', 'public');
+        }
+
+        $teacher         = new Teacher();
+        $teacher->image  = $imgPath;
+        $teacher->save();
+
+        return redirect()->route('teacher.index');
+    }
+
+
+
+
+
+49. A. v) Edit Resources>views>teacher>list.blade.php:
+<td>
+                            @if ($teacher->image)
+                                <img src="{{ asset('storage/' . $teacher->image) }}" alt="" width="150px" height="150px">
+                            @endif
+                        </td>
+
+Then, Command: php artisan storage:link
+
+
+
+
+
+
+50 => laravel 12 - Delete Record with Image | Remove File from Storage:
+-----------------------------------------------------------------------
+50. A. i) Edit app>http>controller>TeacherController.php:
+// Delete
+    public function destroy(Request $request, $id)
+    {
+        $teacher = Teacher::findOrFail($id);
+        if ($teacher->image) {
+            Storage::disk('public')->delete($teacher->image);
+        }
+        $teacher->delete();
+        return redirect()->route('teacher.index');
+    }
 
 
 

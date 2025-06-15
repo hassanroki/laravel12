@@ -1,8 +1,10 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Http\Requests\TeacherAddRequest;
 use App\Models\Teacher;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class TeacherController extends Controller
 {
@@ -29,22 +31,12 @@ class TeacherController extends Controller
     }
 
     // Create
-    public function create(Request $request)
+    public function store(TeacherAddRequest $request)
     {
-        // Validation
-        $request->validate([
-            'name'   => 'required|string|max:255',
-            'email'  => 'required|email|unique:teachers,email',
-            'age'    => 'required|integer|min:1|max:100',
-            'dob'    => 'required|date',
-            'gender' => 'required|in:m,f',
-            'scores' => 'required|integer|min:1|max:100',
-        ], [
-            'name.required' => 'Please Write Teacher Name',
-            'age.max'       => 'Teacher can not be older than 100',
-            'email.email'   => 'Please enter a valid email address',
-            'email.unique'  => 'This email is already taken',
-        ]);
+        $imgPath = null;
+        if ($request->hasFile('image')) {
+            $imgPath = $request->file('image')->store('photos', 'public');
+        }
 
         $teacher         = new Teacher();
         $teacher->name   = $request->name;
@@ -53,6 +45,7 @@ class TeacherController extends Controller
         $teacher->age    = $request->age;
         $teacher->gender = $request->gender;
         $teacher->scores = $request->scores;
+        $teacher->image  = $imgPath;
         $teacher->save();
 
         return redirect()->route('teacher.index');
@@ -84,6 +77,9 @@ class TeacherController extends Controller
     public function destroy(Request $request, $id)
     {
         $teacher = Teacher::findOrFail($id);
+        if ($teacher->image) {
+            Storage::disk('public')->delete($teacher->image);
+        }
         $teacher->delete();
         return redirect()->route('teacher.index');
     }

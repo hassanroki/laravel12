@@ -21,6 +21,7 @@
             <thead class="table-primary">
                 <tr>
                     <th>ID</th>
+                    <th>Image</th>
                     <th>Name</th>
                     <th>Email</th>
                     <th>Age</th>
@@ -35,6 +36,11 @@
                 @foreach ($teachers as $teacher)
                     <tr>
                         <td>{{ $teacher->id }}</td>
+                        <td>
+                            @if ($teacher->image)
+                                <img src="{{ asset('storage/' . $teacher->image) }}" alt="" width="150px" height="150px">
+                            @endif
+                        </td>
                         <td>{{ $teacher->name }}</td>
                         <td>{{ $teacher->email }}</td>
                         <td>{{ $teacher->age }}</td>
