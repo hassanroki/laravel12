@@ -2794,10 +2794,7 @@ Edit Resources>views>teacher>create.blade.php:
 MAIL_MAILER=smtp
 MAIL_HOST=smtp.gmail.com
 MAIL_PORT=587
-MAIL_USERNAME=mdrokibulhassan786@gmail.com
-MAIL_PASSWORD=uaahrlbinaophlul   # Remove quotes if no special characters
-MAIL_ENCRYPTION=tls
-MAIL_FROM_ADDRESS=mdrokibulhassan786@gmail.com
+
 MAIL_FROM_NAME="School Management"
 
 
