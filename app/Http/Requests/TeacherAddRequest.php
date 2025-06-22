@@ -8,6 +8,7 @@ use Illuminate\Foundation\Http\FormRequest;
  *
  * @property string $name
  * @property string $email
+ * @property string $password
  * @property int $age
  * @property string $dob
  * @property string $gender
@@ -16,6 +17,7 @@ use Illuminate\Foundation\Http\FormRequest;
  * @method bool hasFile(string $key)
  * @method UploadedFile file(string $key)
  */
+
 
 class TeacherAddRequest extends FormRequest
 {
@@ -35,13 +37,19 @@ class TeacherAddRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'   => 'required|string|max:255',
-            'email'  => 'required|email|unique:teachers,email',
-            'age'    => 'required|integer|min:1|max:100',
-            'dob'    => 'required|date',
-            'gender' => 'required|in:m,f',
-            'scores' => 'required|integer|min:1|max:100',
-            'image'  => 'nullable|image|mimes:png,jpg,gif|max:2048',
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|email|unique:teachers,email|unique:users,email',
+            'age'      => 'required|integer|min:1|max:100',
+            'dob'      => 'required|date',
+            'gender'   => 'required|in:m,f',
+            'scores'   => 'required|integer|min:1|max:100',
+            'image'    => 'nullable|image|mimes:png,jpg,gif|max:2048',
+            'password' => [
+                'required',
+                'string',
+                'min:6',
+                'regex:/^(?=.*[a-zA-Z])(?=.*\d).+$/', // must contain at least 1 letter and 1 digit
+            ],
         ];
     }
 
@@ -49,10 +57,13 @@ class TeacherAddRequest extends FormRequest
     public function attributes()
     {
         return [
-            'name.required' => 'Please Write Teacher Name',
-            'age.max'       => 'Teacher can not be older than 100',
-            'email.email'   => 'Please enter a valid email address',
-            'email.unique'  => 'This email is already taken',
+            'name.required'     => 'Please write teacher name.',
+            'age.max'           => 'Teacher cannot be older than 100.',
+            'email.email'       => 'Please enter a valid email address.',
+            'email.unique'      => 'This email is already taken.',
+            'password.required' => 'Password is required.',
+            'password.regex'    => 'Password must contain both letters and numbers.',
         ];
     }
+
 }

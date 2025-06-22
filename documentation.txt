@@ -2357,6 +2357,678 @@ Then, Command: php artisan storage:link
 
 
 
+51, 52 => Laravel 12 Eloquent Relationships Introduction | One to One, One to Many, Many to One, Many to Many:
+--------------------------------------------------------------------------------------------------------------
+52. A. One to One Relationship | Eloquent Relationship Expalined: 
+
+
+
+
+
+
+
+
+60 => Laravel 12 UI Bootdtrap Authentication | Simple Login & Registration System:
+----------------------------------------------------------------------------------
+60. A. i) Command: composer require laravel/ui
+
+Then, Command: php artisan ui bootstrap --auth
+Then, answer some question
+Then, Command: npm install
+Then, Command: composer run dev
+
+
+
+
+
+
+
+
+61 => Laravel 12 Breeze Authentication | Simple & Clean Auth for Modern Apps:
+-----------------------------------------------------------------------------
+61. A. i) Breeze Authentication
+Command: composer  require laravel/breeze --dev
+Then, Command: php artisan breeze:install
+Then, Answer Some Question
+Then, Command: php artisan migrate
+Then, Command: npm install
+Then, Command: composer run dev
+
+
+
+
+
+
+
+
+
+62 => Laravel 12 Fortify Authentication | Backend-Only Auth for API & SPA Projects:
+-----------------------------------------------------------------------------------
+62. A. i) Fortify Authentication:
+Command: composer require laravel/fortify
+Then, Command: php artisan vendor:publish
+Then, Select: Laravel\Fortify\FortifySerciceProvider(5)
+Then, Command: php artisan serve
+Then, Command: php artisan migrate
+
+
+
+
+
+
+
+63 => Laravel 12 Jetstream Authentication | Full-Featured Auth with Livewire & Inertia:
+---------------------------------------------------------------------------------------
+63. A. i) Jetstream Authentication:
+Command: composer require laravel/jetstream
+Then, Command: php artisan jetstream:install
+Then, Selecet: livewire
+Then, Darkmood
+Then, 0
+Then, Some Question Answer
+Then, Command: composer run dev
+
+
+
+
+
+
+66 => Laravel 12 Auth Middleware | Protect Your Routes Like a Pro:
+------------------------------------------------------------------
+66. A. i) Single Routes Used Middleware:
+// Teacher
+Route::prefix('/teacher')->controller(TeacherController::class)->group(function () {
+    Route::get('/', 'index')->name('teacher.index')->middleware('auth');
+    Route::get('/add', 'add')->name('teacher.add');
+});
+
+
+
+66. A. ii) Multiple Routes Used Middleware:
+Route::prefix('/teacher')->controller(TeacherController::class)->middleware('auth')->group(function () {
+    Route::get('/', 'index')->name('teacher.index');
+    Route::get('/add', 'add')->name('teacher.add');
+    Route::post('/create', 'store')->name('teacher.create');
+    Route::get('/edit/{id}', 'edit')->name('teacher.edit');
+    Route::post('/edit/{id}', 'update')->name('teacher.update');
+    Route::delete('/delete/{id}', 'destroy')->name('teacher.destroy');
+});
+
+
+
+
+
+
+67 => Laravel 12 Custom Middleware & Aliases | Create & Register Your Own Middleware:
+-------------------------------------------------------------------------------------
+67. A. i) Create Teacher Middleware
+Command: php artisan make:middleware TeacherMiddleware
+Edit app>http>Middleware>TeacherMiddleware.php:
+public function handle(Request $request, Closure $next): Response
+    {
+        $user = Auth::user();
+        if ($user->user_type !== 'teacher') {
+            return back();
+        }
+        return $next($request);
+    }
+
+
+
+
+
+67. A. ii) Edit Route>web.php:
+// Teacher
+Route::prefix('/teacher')->controller(TeacherController::class)->middleware(TeacherMiddleware::class)->group(function () {
+    Route::get('/', 'index')->name('teacher.index');
+});
+'
+//or
+Route::prefix('/teacher')->controller(TeacherController::class)->middleware('teachers')->group(function () {
+    Route::get('/', 'index')->name('teacher.index');
+});
+
+
+
+67. B Another Way
+67. B. i) Create Teacher Middleware
+Command: php artisan make:middleware TeacherMiddleware
+Edit app>http>Middleware>TeacherMiddleware.php:
+public function handle(Request $request, Closure $next): Response
+    {
+        $user = Auth::user();
+        if ($user->user_type !== 'teacher') {
+            return back();
+        }
+        return $next($request);
+    }
+
+
+
+
+
+B. ii) Edit bootstrap>app.php:
+->withMiddleware(function (Middleware $middleware) {
+        //
+        $middleware->alias([
+            'teachers' => TeacherMiddleware::class,
+        ]);
+    })
+
+
+
+
+
+67. B. ii) Edit Route>web.php:
+Route::prefix('/teacher')->controller('teachers')->middleware(TeacherMiddleware::class)->group(function () {
+    Route::get('/', 'index')->name('teacher.index');
+});
+
+
+
+
+
+
+
+68 => Laravel 12 Global Middleware | Run Logic on Every Request:
+----------------------------------------------------------------
+68. A. i) Global Middleware Create
+Command: php artisan make:middleware GlobalMiddleware
+Edit app>http>Middleware>GlobalMiddleware.php:
+public function handle(Request $request, Closure $next): Response
+    {
+        Log::info('School Request: ' . $request->method() . ' ' . $request->path());
+        return $next($request);
+    }
+
+
+
+68. A. ii) Edit bootstrap>app.php:
+->withMiddleware(function (Middleware $middleware) {
+        // Global Middleware
+        $middleware->use([
+            GlobalMiddleware::class,
+        ]);
+
+    })
+
+
+
+
+68. A. iii) Check Log:
+storage>log>larave.log
+
+
+
+
+
+
+
+
+70 => Laravel 12 Gate Tutorial | Authorize Actions Using Gates:
+---------------------------------------------------------------
+70. A. i) Only Own Teacher Edit Her Profile Info
+Edit app>Providers>AppServiceProvider.php:
+// Teacher Edit
+        Gate::define('edit-teacher', function (User $user, Teacher $teacher) {
+            return $user->id === $teacher->user_id;
+        });
+
+        // Teacher Delete
+        Gate::define('teachers', function (User $user) {
+            return $user->user_type === 'teacher';
+        });
+
+
+
+70. A. ii) Edit app>http>controller>TeacherController.php:
+// Edit
+    public function edit($id)
+    {
+        $teacher = Teacher::findOrFail($id);
+        Gate::authorize('edit-teacher', $teacher);
+        return view('teacher.edit', compact('teacher'));
+    }
+
+    // Update
+    public function update(Request $request, $id)
+    {
+        $teacher = Teacher::findOrFail($id);
+        Gate::authorize('edit-teacher', $teacher);
+        $teacher->name   = $request->name;
+        $teacher->email  = $request->email;
+        $teacher->dob    = $request->dob;
+        $teacher->age    = $request->age;
+        $teacher->gender = $request->gender;
+        $teacher->scores = $request->scores;
+        $teacher->update();
+
+        return redirect()->route('teacher.index');
+    }
+
+
+
+
+70. A. iii) Edit Resources>views>teacher>list.blade.php:
+<td class="d-flex">
+                            @can('edit-teacher', $teacher)
+                                <a href="{{ route('teacher.edit', $teacher->id) }}" class="btn btn-info btn-sm">Edit</a>
+                            @endcan
+                            @can('teachers')
+                                <form action="{{ route('teacher.destroy', $teacher->id) }}" method="POST"
+                                    onsubmit="return confirm('Are you sure you want to delete?')" style="displa:inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                </form>
+                            @endcan
+
+                        </td>
+
+
+
+
+
+
+
+71 => Laravel 12 Policy Tutorial | Full Guide to Model-Based Authorization:
+---------------------------------------------------------------------------
+71. A. i) Teacher Policy Create
+Command: php artisan make:policy TeacherPolicy --model=Teacher
+Edit app>Policies>TeacherPolicy.php:
+public function updateTeacher(User $user, Teacher $teacher): bool
+    {
+        return $user->id === $teacher->user_id;
+    }
+
+
+
+71. A. ii) Edit app>http>controller>TeacherController.php:
+// Edit
+    public function edit($id)
+    {
+        $teacher = Teacher::findOrFail($id);
+        Gate::authorize('updateTeacher', $teacher);
+        return view('teacher.edit', compact('teacher'));
+    }
+
+    // Update
+    public function update(Request $request, $id)
+    {
+        $teacher = Teacher::findOrFail($id);
+        Gate::authorize('updateTeacher', $teacher);
+        $teacher->name   = $request->name;
+        $teacher->email  = $request->email;
+        $teacher->dob    = $request->dob;
+        $teacher->age    = $request->age;
+        $teacher->gender = $request->gender;
+        $teacher->scores = $request->scores;
+        $teacher->update();
+
+        return redirect()->route('teacher.index');
+    }
+
+
+
+
+71. A. iii) Edit Resources>views>teacher>list.blade.php:
+@can('updateTeacher', $teacher)
+                                <a href="{{ route('teacher.edit', $teacher->id) }}" class="btn btn-info btn-sm">Edit</a>
+                            @endcan
+
+
+
+
+
+
+
+72 => Laravel 12 Components Tutorial | Reusable Blade Components Made Easy:
+---------------------------------------------------------------------------
+72. A. i) Create component
+Command: php artisan make:component ErrorsComponent
+Edit app\View\Components\ErrorsComponent.php:
+
+
+
+Edit resources\views\components/errors-component.blade.php:
+@if ($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
+
+
+72. A. ii) Used Components
+Edit Resources>views>teacher>create.blade.php:
+<x-ErrorsComponent />
+
+
+
+
+
+72. B) Component Class Used
+Command: php artisan make:component ErrorsComponent
+Edit app\View\Components\ErrorsComponent.php:
+public $className;
+    // Class Pass
+    public function __construct($className)
+    {
+        $this->className = $className;
+    }
+
+
+Edit resources\views\components/errors-component.blade.php:
+@if ($errors->any())
+    <div class="{{ $className }}">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
+
+
+72. A. ii) Used Components
+Edit Resources>views>teacher>create.blade.php:
+<x-ErrorsComponent className="alert alert-danger" />
+
+
+
+
+
+
+
+
+
+74 => Laravel 12 - Session Flash Messages | How to Use Flash Message in Laravel:
+--------------------------------------------------------------------------------
+74. A. i) Edit app>http>controller>TeacherController.php;
+// Create
+    public function store(TeacherAddRequest $request)
+    {
+        $imgPath = null;
+        if ($request->hasFile('image')) {
+            $imgPath = $request->file('image')->store('photos', 'public');
+        }
+
+        $teacher         = new Teacher();
+        $teacher->name   = $request->name;
+        $teacher->email  = $request->email;
+        $teacher->dob    = $request->dob;
+        $teacher->age    = $request->age;
+        $teacher->gender = $request->gender;
+        $teacher->scores = $request->scores;
+        $teacher->image  = $imgPath;
+        $teacher->save();
+
+        Session()->flash('success', 'Teacher Create Successfully!');
+
+        return redirect()->route('teacher.index');
+    }
+
+
+74. A. ii) Edit Resources>views>teacher>list.blade.php:
+@if (session('success'))
+            <div class="alert alert-success">
+                {{ session('success') }}
+            </div>
+        @endif
+
+
+
+
+
+
+
+
+77 => Laravel 12 - Sending Email | How to Send Emails in Laravel, 78 Sending Email with Attachment, 79 Email Verificaton, 80 Custom Email Verification:
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+77. A. i) Edit .env:
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=mdrokibulhassan786@gmail.com
+MAIL_PASSWORD=uaahrlbinaophlul   # Remove quotes if no special characters
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=mdrokibulhassan786@gmail.com
+MAIL_FROM_NAME="School Management"
+
+
+
+
+77. A. ii) Create Mail
+Command: php artisan make:mail WelcomeMail
+Edit app>Mail>WelcomeMail.php:
+/**
+     * Get the message content definition.
+     */
+    public function content(): Content
+    {
+        return new Content(
+            view: 'emails.welcomeMail',
+        );
+    }
+
+
+
+77. A. iii) Create view:welcomeMail.blade.php
+Edit Resources>views>emails>welcomeMail.blade.php:
+<p>Welcome to School Management System</p>
+
+
+
+77. A. iv) Create Controller
+Command: php artisan make:controller EmailController
+Edit app>http>controller>EmailController.php:
+public function welcomeEmail()
+    {
+        Mail::to('hassan0cse@gmail.com')->send(new WelcomeMail());
+
+        return "Email sent successfully!";
+    }
+
+
+
+77. A. v) Create Route>web.php:
+// Send Mail
+Route::get('/send-welcome', [MailController::class, 'welcomeEmail']);
+
+
+
+
+
+78 Sending Email with Attachment:
+78. B. i) Edit app>Mail>WelcomeMail.php:
+public function attachments(): array
+    {
+        return [
+            Attachment::fromPath(storage_path('app/public/VueJS.pdf'))
+                ->as('Your Vue.js PDF')
+                ->withMime('application/pdf'),
+        ];
+    }
+
+
+
+79 Email Verification:
+79. C. i) Edit app>Models>user.php:
+class User extends Authenticatable implements MustVerifyEmail
+
+
+
+79. C. ii) Edit Route>web.php:
+// Teacher
+Route::prefix('/teacher')
+    ->middleware(['auth', 'teachers', 'verified'])
+    ->controller(TeacherController::class)
+    ->group(function () {
+        Route::get('/', 'index')->name('teacher.index');
+        Route::get('/add', 'add')->name('teacher.add');
+        Route::post('/create', 'store')->name('teacher.create');
+        Route::get('/edit/{id}', 'edit')->name('teacher.edit');
+        Route::post('/edit/{id}', 'update')->name('teacher.update');
+        Route::delete('/delete/{id}', 'destroy')->name('teacher.destroy');
+    });
+
+Auth::routes(['verify' => true]);
+
+
+
+
+80 Custom Email Verification:
+80. D). i) app>Providers>AppServiceProvider.php:
+VerifyEmail::toMailUsing(function($notifable, $url){
+            return (new MailMessage)
+            ->subject('Verify Email Address')
+            ->view('emails.verify-email', compact('url'));
+        });
+
+
+
+80. D. ii) Edit Resources>views>emails>verify-email.blade.php:
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Verify Your Email Address</title>
+    <style>
+        body {
+            background-color: #f7f7f7;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 40px;
+        }
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            max-width: 600px;
+            margin: auto;
+            padding: 30px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        p {
+            color: #555;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            margin-top: 20px;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 13px;
+            color: #999;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Email Verification</h2>
+    <p>Thank you for registering. Please click the button below to verify your email address:</p>
+
+    <a href="{{ $url }}" class="btn">Verify Email Address</a>
+
+    <p>If you did not create an account, no further action is required.</p>
+
+    <div class="footer">
+        &copy; {{ date('Y') }} School Management System. All rights reserved.
+    </div>
+</div>
+</body>
+</html>
+
+
+
+
+
+
+
+81 => Laravel 12 - Queues | How to Use Queues in Laravel for Background Jobs:
+-----------------------------------------------------------------------------
+81. A. i) Edit app>http>controller>MailController.php:
+public function welcomeEmail()
+    {
+        $teachers = User::where('user_type', 2)
+            ->limit(10)
+            ->get();
+
+        foreach ($teachers as $teacher) {
+            ResultsJob::dispatch($teacher->email);
+        }
+
+        return "Email sent successfully!";
+    }
+
+
+
+81. A. ii) Create job
+Command: php artisan make:job ResultsJob
+Edit app>Jobs>ResultsJob.php:
+public $email;
+    public function __construct(string $email)
+    {
+        //
+        $this->email = $email;
+    }
+
+    /**
+     * Execute the job.
+     */
+    public function handle(): void
+    {
+        //
+        Mail::to($this->email)->send(new WelcomeMail);
+    }
+
+
+
+Then, Command: php artisan queue:work
+
+
+
+
+
+
+83 = > Laravel 12 - WebSocket | Real-Time Communication with Laravel Reverb:
+----------------------------------------------------------------------------
+83. A. i) Laravel Reverb
+Command: php artisan install:broadcasting
+Then, Answer Some Question
+
+
+
+83. A. ii) Register Channel
+Edit Bootstrap>app.php:
+
+
+
+
+
+
+
+83. A. iii) Edit Route>web.php:
+
+
+
+
 
 
 

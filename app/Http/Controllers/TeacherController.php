@@ -3,7 +3,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\TeacherAddRequest;
 use App\Models\Teacher;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 
 class TeacherController extends Controller
@@ -38,16 +42,27 @@ class TeacherController extends Controller
             $imgPath = $request->file('image')->store('photos', 'public');
         }
 
-        $teacher         = new Teacher();
-        $teacher->name   = $request->name;
-        $teacher->email  = $request->email;
-        $teacher->dob    = $request->dob;
-        $teacher->age    = $request->age;
-        $teacher->gender = $request->gender;
-        $teacher->scores = $request->scores;
-        $teacher->image  = $imgPath;
+        // Create user first
+        $user = User::create([
+            'name'      => $request->name,
+            'email'     => $request->email,
+            'password'  => Hash::make($request->password),
+            'user_type' => 2, // 2 = teacher
+        ]);
+
+        // Create teacher linked to user
+        $teacher          = new Teacher();
+        $teacher->user_id = $user->id;
+        $teacher->name    = $request->name;
+        $teacher->email   = $request->email;
+        $teacher->dob     = $request->dob;
+        $teacher->age     = $request->age;
+        $teacher->gender  = $request->gender;
+        $teacher->scores  = $request->scores;
+        $teacher->image   = $imgPath;
         $teacher->save();
 
+        session()->flash('success', 'Teacher created successfully!');
         return redirect()->route('teacher.index');
     }
 
@@ -55,13 +70,15 @@ class TeacherController extends Controller
     public function edit($id)
     {
         $teacher = Teacher::findOrFail($id);
+        Gate::authorize('updateTeacher', $teacher);
         return view('teacher.edit', compact('teacher'));
     }
 
     // Update
     public function update(Request $request, $id)
     {
-        $teacher         = Teacher::findOrFail($id);
+        $teacher = Teacher::findOrFail($id);
+        Gate::authorize('updateTeacher', $teacher);
         $teacher->name   = $request->name;
         $teacher->email  = $request->email;
         $teacher->dob    = $request->dob;

@@ -1,6 +1,7 @@
 <?php
 namespace Database\Factories;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -16,12 +17,13 @@ class TeacherFactory extends Factory
     public function definition(): array
     {
         return [
-            'name'   => $this->faker->name(),
-            'email'  => $this->faker->unique()->safeEmail(),
-            'age'    => $this->faker->numberBetween(18, 60),
-            'dob'    => $this->faker->date(), // Generates a valid date
-            'gender' => $this->faker->randomElement(['m', 'f']),
-            'scores' => $this->faker->numberBetween(1, 100),
+            'user_id' => User::factory(),
+            'name'    => $this->faker->name(),
+            'email'   => $this->faker->unique()->safeEmail(),
+            'age'     => $this->faker->numberBetween(18, 60),
+            'dob'     => $this->faker->date(),
+            'gender'  => $this->faker->randomElement(['m', 'f']),
+            'scores'  => $this->faker->numberBetween(1, 100),
         ];
 
     }

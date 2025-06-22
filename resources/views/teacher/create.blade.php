@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.appOld')
 @section('styles')
     <style>
 
@@ -10,15 +10,7 @@
     <div class="col-md-10 p-4">
         <div class="form-container">
             <h5 class="text-white bg-primary p-2 rounded">Teacher Registration</h5>
-            @if ($errors->any())
-                <div class="alert alert-danger">
-                    <ul>
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
+            <x-ErrorsComponent className="alert alert-danger" />
             <form action="{{ route('teacher.create') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="mb-3">
@@ -65,6 +57,16 @@
             <input type="file" id="image" name="image" class="form-control" value="{{ old('image') }}"
                 accept="image/*">
         </div>
+        <div class="mb-3">
+            <label class="form-label">Password</label>
+            <input type="password" name="password" class="form-control" placeholder="Enter password">
+            <div class="form-text">Password must include both letters and numbers, at least 6 characters.</div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Confirm Password</label>
+            <input type="password" name="password_confirmation" class="form-control" placeholder="Confirm password">
+        </div>
+
         <button type="submit" class="btn btn-success">Submit</button>
         </form>
     </div>

@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.appOld')
 @section('styles')
     <style>
 
@@ -17,6 +17,13 @@
                 <a href="{{ route('teacher.add') }}" class="btn btn-info">Add Student</a>
             </div>
         </form>
+
+        @if (session('success'))
+            <div class="alert alert-success">
+                {{ session('success') }}
+            </div>
+        @endif
+
         <table class="table table-bordered table-striped">
             <thead class="table-primary">
                 <tr>
@@ -38,7 +45,8 @@
                         <td>{{ $teacher->id }}</td>
                         <td>
                             @if ($teacher->image)
-                                <img src="{{ asset('storage/' . $teacher->image) }}" alt="" width="150px" height="150px">
+                                <img src="{{ asset('storage/' . $teacher->image) }}" alt="" width="150px"
+                                    height="150px">
                             @endif
                         </td>
                         <td>{{ $teacher->name }}</td>
@@ -48,13 +56,18 @@
                         <td>{{ $teacher->gender }}</td>
                         <td>{{ $teacher->scores }}</td>
                         <td class="d-flex">
-                            <a href="{{ route('teacher.edit', $teacher->id) }}" class="btn btn-info btn-sm">Edit</a>
-                            <form action="{{ route('teacher.destroy', $teacher->id) }}" method="POST"
-                                onsubmit="return confirm('Are you sure you want to delete?')" style="displa:inline">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                            </form>
+                            @can('updateTeacher', $teacher)
+                                <a href="{{ route('teacher.edit', $teacher->id) }}" class="btn btn-info btn-sm">Edit</a>
+                            @endcan
+                            @can('teachers')
+                                <form action="{{ route('teacher.destroy', $teacher->id) }}" method="POST"
+                                    onsubmit="return confirm('Are you sure you want to delete?')" style="displa:inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                </form>
+                            @endcan
+
                         </td>
                     </tr>
                 @endforeach

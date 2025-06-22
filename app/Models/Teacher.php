@@ -29,4 +29,11 @@ class Teacher extends Model
         $return = $query->where('scores', 20)
             ->where('age', 20);
     }
+
+    // User Table
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
 }
